@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import { Line, Doughnut } from 'react-chartjs-2';
 import CreatePost from './components/CreatePost';
 import Calendar from './components/Calendar';
 
@@ -28,13 +28,6 @@ ChartJS.register(
   Legend
 );
 
-const BREAKPOINTS = {
-  iPhone14Pro: '390px',
-  iPadPro: '1024px',
-  macBookPro: '1512px',
-  desktop: '1920px'
-};
-
 function App() {
   const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);
   const [isTopPostsDrawerOpen, setIsTopPostsDrawerOpen] = useState(false);
@@ -46,9 +39,9 @@ function App() {
   const [currentView, setCurrentView] = useState('dashboard');
 
   // New state for social performance metrics
-  const [socialMetrics, setSocialMetrics] = useState({
+  const [socialMetrics] = useState({
     followers: {
-      current: 70000,  // Sum of followers from the three platforms
+      current: 70000,
       previous: 65000,
       target: 100000,
       weight: 0.25,
@@ -207,14 +200,11 @@ function App() {
   // Calculate social performance score
   const calculateScore = () => {
     let totalScore = 0;
-    
-    for (const [key, metric] of Object.entries(socialMetrics)) {
-      const percentageOfTarget = (metric.current / metric.target) * 100;
-      const cappedPercentage = Math.min(percentageOfTarget, 100);
-      totalScore += (cappedPercentage * metric.weight);
+    for (const [, metric] of Object.entries(socialMetrics)) {
+      const progress = (metric.current - metric.previous) / (metric.target - metric.previous);
+      totalScore += progress * metric.weight;
     }
-    
-    return Math.round(totalScore);
+    return Math.round(totalScore * 100);
   };
 
   // Calculate month over month change
@@ -280,35 +270,6 @@ function App() {
   const momChange = calculateMoMChange();
   const recommendations = generateRecommendations();
 
-  const readyMadePrompts = [
-    {
-      title: "Content Strategy",
-      prompts: [
-        "What type of content should we create for luxury hotel guests?",
-        "How can we showcase our hotel amenities effectively?"
-      ]
-    },
-    {
-      title: "Engagement",
-      prompts: [
-        "How to improve our Instagram engagement rate?",
-        "What are the best times to post for maximum reach?"
-      ]
-    },
-    {
-      title: "Competition",
-      prompts: [
-        "What social media strategies are working for our competitors?"
-      ]
-    },
-    {
-      title: "Analytics",
-      prompts: [
-        "How to interpret our current engagement metrics?"
-      ]
-    }
-  ];
-
   // Chart Data
   const engagementData = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -324,23 +285,6 @@ function App() {
         pointBackgroundColor: 'rgb(147, 51, 234)',
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
-      },
-    ],
-  };
-
-  const followersData = {
-    labels: ['Instagram', 'Facebook', 'LinkedIn'],
-    datasets: [
-      {
-        label: 'Followers',
-        data: [35000, 25000, 10000],
-        backgroundColor: [
-          'rgba(147, 51, 234, 0.8)',  // Purple for Instagram
-          'rgba(59, 130, 246, 0.8)',  // Blue for Facebook
-          'rgba(16, 185, 129, 0.8)',  // Green for LinkedIn
-        ],
-        borderRadius: 8,
-        borderWidth: 0,
       },
     ],
   };

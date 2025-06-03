@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns';
 
 interface Event {
@@ -20,7 +20,7 @@ interface Holiday {
 
 const Calendar: React.FC<{ events: Event[] }> = ({ events }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [holidays, setHolidays] = useState<Holiday[]>([
+  const [holidays] = useState<Holiday[]>([
     { name: "Easter Monday", date: "2024-04-01", type: "public" },
     { name: "Early May Bank Holiday", date: "2024-05-06", type: "bank" },
     { name: "Spring Bank Holiday", date: "2024-05-27", type: "bank" },
