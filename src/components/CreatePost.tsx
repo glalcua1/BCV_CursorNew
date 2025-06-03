@@ -31,12 +31,6 @@ const SOCIAL_PLATFORMS: SocialPlatform[] = [
     color: 'bg-blue-600'
   },
   {
-    id: 'twitter',
-    name: 'Twitter',
-    icon: 'https://cdn.simpleicons.org/x/white',
-    color: 'bg-black'
-  },
-  {
     id: 'linkedin',
     name: 'LinkedIn',
     icon: 'https://cdn.simpleicons.org/linkedin/white',
@@ -187,12 +181,15 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Form Section */}
-        <div className="bg-white rounded-2xl shadow-sm p-8">
+        <div className="bg-white rounded-2xl shadow-sm p-8 hover:shadow-md transition-all duration-300">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Create New Post</h2>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900">Create New Post</h2>
+              <p className="text-gray-600 mt-2">Share your content across social platforms</p>
+            </div>
             <button
               onClick={() => onSubmit({ content: '', platform: '', mediaUrls: [], hashtags: [] })}
               className="flex items-center text-gray-600 hover:text-purple-600 transition-colors"
@@ -206,8 +203,8 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
 
           {/* Platform Selection */}
           <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">Choose Platform</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose Platform</h3>
+            <div className="grid grid-cols-3 gap-4">
               {SOCIAL_PLATFORMS.map((socialPlatform) => (
                 <button
                   key={socialPlatform.id}
@@ -215,13 +212,17 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
                     setPlatform(socialPlatform.id);
                     setShowPreview(true);
                   }}
-                  className={`relative rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition-all duration-200 ${
+                  className={`relative rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all duration-200 ${
                     platform === socialPlatform.id
                       ? `${socialPlatform.color} text-white ring-2 ring-offset-2 ring-${socialPlatform.color}`
                       : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
                   }`}
                 >
-                  <img src={socialPlatform.icon} alt={socialPlatform.name} className="w-8 h-8" />
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    platform === socialPlatform.id ? 'bg-white/20' : 'bg-white'
+                  }`}>
+                    <img src={socialPlatform.icon} alt={socialPlatform.name} className="w-8 h-8" />
+                  </div>
                   <span className="text-sm font-medium">{socialPlatform.name}</span>
                 </button>
               ))}
@@ -234,8 +235,8 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
               <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
-                    <h3 className="text-lg font-semibold text-gray-700">AI Content Assistant</h3>
-                    <div className="bg-purple-100 text-purple-600 px-2 py-0.5 rounded text-xs font-medium">Beta</div>
+                    <h3 className="text-lg font-semibold text-gray-900">AI Content Assistant</h3>
+                    <div className="bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full text-xs font-medium">Beta</div>
                   </div>
                   <label className="flex items-center cursor-pointer group">
                     <div className="relative">
@@ -275,15 +276,23 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                       placeholder="Describe what you want to post about..."
-                      className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-gray-400"
                     />
                     <button
                       type="button"
                       onClick={generateContent}
                       disabled={isGenerating || !prompt}
-                      className="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg px-4 py-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+                      className="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg px-4 py-3 hover:opacity-90 transition-opacity disabled:opacity-50 font-medium"
                     >
-                      {isGenerating ? 'Generating...' : 'Generate Content'}
+                      {isGenerating ? (
+                        <div className="flex items-center justify-center">
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Generating...
+                        </div>
+                      ) : 'Generate Content'}
                     </button>
                   </div>
                 )}
@@ -299,7 +308,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   rows={6}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="Write your post content here..."
                 />
               </div>
@@ -310,7 +319,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
                   {hashtags.map((tag, index) => (
                     <span
                       key={index}
-                      className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium"
+                      className="bg-purple-50 text-purple-600 px-4 py-2 rounded-full text-sm font-medium hover:bg-purple-100 transition-colors cursor-pointer"
                     >
                       {tag}
                     </span>
@@ -333,23 +342,28 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
                 />
                 <label
                   htmlFor="media"
-                  className="block w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-purple-500 transition-colors"
+                  className="block w-full border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-purple-500 transition-colors group"
                 >
-                  <svg
-                    className="mx-auto h-12 w-12 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  <span className="mt-2 block text-sm font-medium text-gray-600">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-colors">
+                    <svg
+                      className="w-8 h-8 text-purple-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-gray-600 group-hover:text-purple-600 transition-colors">
                     Add photos or videos
+                  </span>
+                  <span className="mt-1 block text-xs text-gray-500">
+                    Drag and drop or click to upload
                   </span>
                 </label>
                 {mediaUrls.length > 0 && (
@@ -359,12 +373,12 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
                         <img
                           src={url}
                           alt={`Upload ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
+                          className="w-full h-32 object-cover rounded-lg shadow-sm"
                         />
                         <button
                           type="button"
                           onClick={() => setMediaUrls(mediaUrls.filter((_, i) => i !== index))}
-                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-600"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -385,13 +399,13 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
                   <button
                     type="button"
                     onClick={suggestPostingTimes}
-                    className="text-sm text-purple-600 hover:text-purple-700"
+                    className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                   >
                     Suggest best times
                   </button>
                 </div>
                 {suggestedTimes.length > 0 && (
-                  <div className="mb-4 space-y-2">
+                  <div className="mb-4 space-y-2 bg-gray-50 rounded-lg p-4">
                     {suggestedTimes.map((time, index) => (
                       <div key={index} className="text-sm text-gray-600 flex items-center">
                         <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -407,21 +421,21 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
                   id="scheduledTime"
                   value={scheduledTime}
                   onChange={(e) => setScheduledTime(e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-end space-x-4 pt-4">
                 <button
                   type="button"
-                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium"
                 >
                   Save as Draft
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:opacity-90 transition-opacity"
+                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:opacity-90 transition-opacity font-medium"
                 >
                   {scheduledTime ? 'Schedule Post' : 'Post Now'}
                 </button>
@@ -431,12 +445,12 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
         </div>
 
         {/* Preview Section */}
-        <div className="lg:sticky lg:top-6 h-fit space-y-6 self-start">
+        <div className="lg:sticky lg:top-8 space-y-6 self-start">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-700">Post Preview</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Post Preview</h3>
             <button
               onClick={() => setShowPreview(!showPreview)}
-              className="text-sm text-purple-600 hover:text-purple-700"
+              className="text-sm text-purple-600 hover:text-purple-700 font-medium"
             >
               {showPreview ? 'Hide Preview' : 'Show Preview'}
             </button>
