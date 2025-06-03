@@ -7,12 +7,11 @@ import {
   PointElement,
   LineElement,
   BarElement,
-  ArcElement,
   Title,
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Line, Doughnut } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import CreatePost from './components/CreatePost';
 import Calendar from './components/Calendar';
 
@@ -22,16 +21,29 @@ ChartJS.register(
   PointElement,
   LineElement,
   BarElement,
-  ArcElement,
   Title,
   Tooltip,
   Legend
 );
 
+interface Chat {
+  user: string;
+  message: string;
+  sentiment: 'positive' | 'neutral' | 'negative';
+  platform: 'Instagram' | 'Twitter' | 'Facebook' | 'LinkedIn' | 'TripAdvisor';
+  time: string;
+}
+
+interface KeywordChats {
+  [key: string]: Chat[];
+}
+
 function App() {
   const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);
   const [isTopPostsDrawerOpen, setIsTopPostsDrawerOpen] = useState(false);
   const [isEventsDrawerOpen, setIsEventsDrawerOpen] = useState(false);
+  const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null);
+  const [isKeywordChatOpen, setIsKeywordChatOpen] = useState(false);
   const [aiQuery, setAiQuery] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -197,6 +209,35 @@ function App() {
     }
   ];
 
+  // Add mock chat data for keywords
+  const keywordChats: KeywordChats = {
+    "#luxuryhotel": [
+      { user: "Sarah J.", message: "The spa at your hotel is absolutely incredible! #luxuryhotel", sentiment: "positive", platform: "Instagram", time: "2h ago" },
+      { user: "TravelBlogger", message: "Best weekend getaway! The service was impeccable #luxuryhotel", sentiment: "positive", platform: "Twitter", time: "5h ago" },
+      { user: "LuxuryLife", message: "Nothing beats the view from the penthouse suite #luxuryhotel", sentiment: "positive", platform: "Instagram", time: "1d ago" }
+    ],
+    "fine dining": [
+      { user: "FoodCritic", message: "The tasting menu was a culinary journey through excellence", sentiment: "positive", platform: "Facebook", time: "3h ago" },
+      { user: "GourmetLover", message: "Chef's special tonight was outstanding! fine dining at its best", sentiment: "positive", platform: "Instagram", time: "6h ago" },
+      { user: "WineEnthusiast", message: "Impressed by the wine pairing selection", sentiment: "positive", platform: "Twitter", time: "1d ago" }
+    ],
+    "spa experience": [
+      { user: "WellnessGuru", message: "The massage treatment was heavenly! #spaday", sentiment: "positive", platform: "Instagram", time: "4h ago" },
+      { user: "RelaxSeeker", message: "Perfect spa experience for a weekend retreat", sentiment: "positive", platform: "Facebook", time: "1d ago" },
+      { user: "LuxurySpas", message: "One of the best spa experiences in London", sentiment: "positive", platform: "Twitter", time: "2d ago" }
+    ],
+    "room service": [
+      { user: "BusinessTraveler", message: "24/7 room service is top-notch", sentiment: "positive", platform: "LinkedIn", time: "5h ago" },
+      { user: "FoodieExplorer", message: "Late night room service menu is extensive", sentiment: "neutral", platform: "Instagram", time: "1d ago" },
+      { user: "LuxuryStays", message: "Room service breakfast was perfect", sentiment: "positive", platform: "Facebook", time: "2d ago" }
+    ],
+    "concierge": [
+      { user: "GlobalTraveler", message: "Concierge team went above and beyond!", sentiment: "positive", platform: "TripAdvisor", time: "6h ago" },
+      { user: "VIPGuest", message: "Thanks to the concierge for the amazing restaurant recommendations", sentiment: "positive", platform: "Instagram", time: "1d ago" },
+      { user: "LuxuryExpert", message: "Exceptional concierge service as always", sentiment: "positive", platform: "Facebook", time: "2d ago" }
+    ]
+  };
+
   // Calculate social performance score
   const calculateScore = () => {
     let totalScore = 0;
@@ -289,25 +330,6 @@ function App() {
     ],
   };
 
-  const newEngagementData = {
-    labels: ['Likes', 'Comments', 'Shares', 'Saves'],
-    datasets: [
-      {
-        data: [120, 80, 60, 50],
-        backgroundColor: [
-          'rgba(147, 51, 234, 0.8)',
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(245, 158, 11, 0.8)',
-        ],
-        borderWidth: 0,
-        spacing: 2,
-        borderRadius: 4,
-        hoverOffset: 8,
-      },
-    ],
-  };
-
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -373,13 +395,6 @@ function App() {
         beginAtZero: true,
       },
     },
-  };
-
-  // Specific options for doughnut chart
-  const doughnutOptions = {
-    ...chartOptions,
-    cutout: '75%',
-    radius: '90%',
   };
 
   const handleAskAI = async () => {
@@ -463,49 +478,60 @@ function App() {
         </button>
 
         {/* Navigation Items */}
-        <div className="flex-1 overflow-y-auto py-4">
-          <nav className="px-4 space-y-1">
-            <button
-              onClick={() => setCurrentView('dashboard')}
-              className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${
-                currentView === 'dashboard' 
-                ? 'bg-purple-50 text-purple-600' 
-                : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              <span className={`${isNavCollapsed ? 'hidden' : 'block'}`}>Dashboard</span>
-            </button>
+        <div className="flex-1 overflow-y-auto py-4 flex flex-col">
+          <nav className="px-4 space-y-1 flex-1">
+            {/* Main Navigation */}
+            <div className="space-y-1 mb-6">
+              <button
+                onClick={() => setCurrentView('dashboard')}
+                className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${
+                  currentView === 'dashboard' 
+                  ? 'bg-purple-50 text-purple-600' 
+                  : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span className={`${isNavCollapsed ? 'hidden' : 'block'}`}>Dashboard</span>
+              </button>
 
-            <button
-              onClick={() => setCurrentView('create-post')}
-              className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${
-                currentView === 'create-post' 
-                ? 'bg-purple-50 text-purple-600' 
-                : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className={`${isNavCollapsed ? 'hidden' : 'block'}`}>Create Post</span>
-            </button>
+              <button
+                onClick={() => setCurrentView('create-post')}
+                className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${
+                  currentView === 'create-post' 
+                  ? 'bg-purple-50 text-purple-600' 
+                  : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className={`${isNavCollapsed ? 'hidden' : 'block'}`}>Create Post</span>
+              </button>
 
-            <button
-              onClick={() => setCurrentView('calendar')}
-              className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${
-                currentView === 'calendar' 
-                ? 'bg-purple-50 text-purple-600' 
-                : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span className={`${isNavCollapsed ? 'hidden' : 'block'}`}>Calendar</span>
-            </button>
+              <button
+                onClick={() => setCurrentView('calendar')}
+                className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${
+                  currentView === 'calendar' 
+                  ? 'bg-purple-50 text-purple-600' 
+                  : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className={`${isNavCollapsed ? 'hidden' : 'block'}`}>Calendar</span>
+              </button>
+            </div>
+
+            {/* Separator */}
+            <div className={`${isNavCollapsed ? 'mx-2' : 'mx-3'} border-t border-gray-200 my-4`}></div>
+
+            {/* Tools Section */}
+            <div className={`${isNavCollapsed ? 'hidden' : 'block'} mb-2 px-3`}>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Tools</h3>
+            </div>
 
             <button
               onClick={() => setIsAIDrawerOpen(true)}
@@ -537,6 +563,33 @@ function App() {
               <span className={`${isNavCollapsed ? 'hidden' : 'block'}`}>Events</span>
             </button>
           </nav>
+
+          {/* Bottom Section with Settings and Profile */}
+          <div className="px-4 mt-auto">
+            <div className={`${isNavCollapsed ? 'mx-2' : 'mx-3'} border-t border-gray-200 my-4`}></div>
+            <div className="space-y-1">
+              <button
+                onClick={() => {}}
+                className="w-full flex items-center px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className={`${isNavCollapsed ? 'hidden' : 'block'}`}>Settings</span>
+              </button>
+
+              <button
+                onClick={() => {}}
+                className="w-full flex items-center px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span className={`${isNavCollapsed ? 'hidden' : 'block'}`}>Profile</span>
+              </button>
+            </div>
+          </div>
         </div>
       </nav>
 
@@ -553,28 +606,47 @@ function App() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Social Performance</h2>
                 <div className="flex flex-col sm:flex-row sm:items-center mt-2 space-y-2 sm:space-y-0">
                   <p className="text-gray-600">Monitor and optimize your hotel's social media presence</p>
-                  <div className="sm:ml-4 flex items-center space-x-2">
-                    <select 
-                      className="w-full sm:w-auto text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
-                      defaultValue="last7days"
-                    >
-                      <option value="today">Today</option>
-                      <option value="yesterday">Yesterday</option>
-                      <option value="last7days">Last 7 days</option>
-                      <option value="last30days">Last 30 days</option>
-                      <option value="thisMonth">This Month</option>
-                      <option value="lastMonth">Last Month</option>
-                      <option value="custom">Custom Range</option>
-                    </select>
-                    <button className="text-purple-600 hover:text-purple-700 text-sm font-medium">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                    </button>
-                  </div>
                 </div>
               </div>
               <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
+                <div className="relative group flex-1 sm:flex-none">
+                  <select 
+                    className="w-full sm:w-auto text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white pr-10"
+                    defaultValue="last7days"
+                  >
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="last7days">Last 7 days</option>
+                    <option value="last30days">Last 30 days</option>
+                    <option value="thisMonth">This Month</option>
+                    <option value="lastMonth">Last Month</option>
+                    <option value="custom">Custom Range</option>
+                  </select>
+                  <div className="absolute top-full left-0 mt-2 w-64 p-4 bg-white rounded-xl shadow-lg border border-gray-100 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 z-10">
+                    <h4 className="font-medium text-gray-900 mb-2">Data Variance</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Engagement</span>
+                        <span className="text-green-600">+12.5%</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Impressions</span>
+                        <span className="text-green-600">+8.3%</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Link Clicks</span>
+                        <span className="text-red-600">-2.1%</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Followers</span>
+                        <span className="text-green-600">+5.7%</span>
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                      <p className="text-xs text-gray-500">Compared to previous period</p>
+                    </div>
+                  </div>
+                </div>
                 <button 
                   onClick={() => setIsEventsDrawerOpen(true)}
                   className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors duration-200"
@@ -598,97 +670,136 @@ function App() {
 
             {/* Performance Score Card */}
             <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 lg:p-8 mb-8 hover:shadow-md transition-shadow duration-300">
-              <div className={`flex flex-col ${isNavCollapsed ? 'lg:flex-row' : 'xl:flex-row'} justify-between gap-4 sm:gap-6 lg:gap-8`}>
-                <div className="flex-1 space-y-4 sm:space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <h3 className="text-xl font-semibold text-gray-900">Social Performance Score</h3>
-                      <div className="relative group ml-2">
-                        <svg className="w-5 h-5 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-                          A weighted score (0-100%) calculated from your social media metrics including followers, impressions, engagement, and link clicks relative to their targets.
-                          <div className="absolute left-1/2 -bottom-1 -translate-x-1/2 w-2 h-2 bg-gray-900 transform rotate-45"></div>
-                        </div>
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <h3 className="text-xl font-semibold text-gray-900">Social Performance Score</h3>
+                    <div className="relative group ml-2">
+                      <svg className="w-5 h-5 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                        A weighted score (0-100%) calculated from your social media metrics including followers, impressions, engagement, and link clicks relative to their targets.
+                        <div className="absolute left-1/2 -bottom-1 -translate-x-1/2 w-2 h-2 bg-gray-900 transform rotate-45"></div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className={`inline-flex items-center text-sm ${momChange >= 0 ? 'text-green-600' : 'text-red-600'} bg-opacity-10 px-3 py-1 rounded-full`}>
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={momChange >= 0 ? "M5 10l7-7m0 0l7 7m-7-7v18" : "M19 14l-7 7m0 0l-7-7m7 7V3"} />
-                        </svg>
-                        {momChange}% MoM
-                      </span>
-                      <span className="inline-flex items-center text-green-600 text-sm bg-green-50 px-3 py-1 rounded-full">
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className={`inline-flex items-center text-sm ${momChange >= 0 ? 'text-green-600' : 'text-red-600'} bg-opacity-10 px-3 py-1 rounded-full`}>
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={momChange >= 0 ? "M5 10l7-7m0 0l7 7m-7-7v18" : "M19 14l-7 7m0 0l-7-7m7 7V3"} />
+                      </svg>
+                      {momChange}% MoM
+                    </span>
+                    <div className="relative group">
+                      <span className="inline-flex items-center text-green-600 text-sm bg-green-50 px-3 py-1 rounded-full cursor-help">
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                         +10% vs competitors
                       </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-baseline">
-                    <span className="text-6xl font-bold text-gray-900">{performanceScore}%</span>
-                    <span className="ml-4 text-lg text-gray-500">Performance Score</span>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div>
-                      <p className="text-gray-700 mb-3 font-medium">Top recommendations:</p>
-                      {recommendations.map((rec, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setIsTopPostsDrawerOpen(true)}
-                          className="w-full flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-xl transition-colors mb-2 group"
-                        >
-                          <span className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${rec.priority === 'High' ? 'bg-purple-500' : 'bg-blue-400'}`}></span>
-                          <div className="text-left">
-                            <p className="text-gray-800 group-hover:text-purple-600 transition-colors">{rec.text}</p>
-                            <p className="text-sm text-gray-500 mt-1">Impact: {rec.metric} • Priority: {rec.priority}</p>
+                      <div className="absolute right-0 bottom-full mb-2 w-72 p-4 bg-white rounded-xl shadow-lg border border-gray-100 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 z-10">
+                        <h4 className="font-medium text-gray-900 mb-2">Competitor Comparison</h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">The Ritz London</span>
+                            <span className="text-green-600">+8%</span>
                           </div>
-                          <svg className="w-5 h-5 text-gray-400 group-hover:text-purple-600 transition-colors ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
-                      ))}
-                    </div>
-
-                    <div>
-                      <p className="text-gray-700 mb-3 font-medium">Trending Keywords:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {socialListeningKeywords.map((item, index) => (
-                          <div 
-                            key={index}
-                            className="inline-flex items-center px-4 py-2 rounded-full text-sm bg-white border border-gray-200 hover:border-purple-200 transition-colors cursor-pointer group"
-                          >
-                            <span className="text-gray-800 group-hover:text-purple-600 transition-colors">{item.keyword}</span>
-                            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
-                              item.sentiment > 0.7 ? 'bg-green-100 text-green-700' : 
-                              item.sentiment > 0.5 ? 'bg-yellow-100 text-yellow-700' : 
-                              'bg-red-100 text-red-700'
-                            }`}>
-                              {item.mentions}
-                            </span>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Claridge's</span>
+                            <span className="text-green-600">+12%</span>
                           </div>
-                        ))}
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">The Dorchester</span>
+                            <span className="text-green-600">+5%</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">The Savoy</span>
+                            <span className="text-red-600">-2%</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Mandarin Oriental</span>
+                            <span className="text-green-600">+15%</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">The Connaught</span>
+                            <span className="text-green-600">+7%</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Brown's Hotel</span>
+                            <span className="text-green-600">+3%</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">The Berkeley</span>
+                            <span className="text-red-600">-4%</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Four Seasons Park Lane</span>
+                            <span className="text-green-600">+9%</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">The Lanesborough</span>
+                            <span className="text-green-600">+6%</span>
+                          </div>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <p className="text-xs text-gray-500">Based on social media engagement rates over the last 30 days</p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className={`flex-shrink-0 ${isNavCollapsed ? 'lg:w-1/3' : 'xl:w-1/3'} hidden sm:block`}>
-                  <img 
-                    src="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&q=80"
-                    alt="Social Media Performance Illustration" 
-                    className="w-full h-auto rounded-xl object-cover shadow-lg"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.onerror = null;
-                      target.src = 'https://placehold.co/400x300?text=Social+Media+Performance';
-                    }}
-                  />
+                <div className="flex items-baseline">
+                  <span className="text-6xl font-bold text-gray-900">{performanceScore}%</span>
+                  <span className="ml-4 text-lg text-gray-500">Performance Score</span>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <p className="text-gray-700 mb-3 font-medium">Top recommendations:</p>
+                    {recommendations.map((rec, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setIsTopPostsDrawerOpen(true)}
+                        className="w-full flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-xl transition-colors mb-2 group"
+                      >
+                        <span className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${rec.priority === 'High' ? 'bg-purple-500' : 'bg-blue-400'}`}></span>
+                        <div className="text-left">
+                          <p className="text-gray-800 group-hover:text-purple-600 transition-colors">{rec.text}</p>
+                          <p className="text-sm text-gray-500 mt-1">Impact: {rec.metric} • Priority: {rec.priority}</p>
+                        </div>
+                        <svg className="w-5 h-5 text-gray-400 group-hover:text-purple-600 transition-colors ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div>
+                    <p className="text-gray-700 mb-3 font-medium">Trending Keywords:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {socialListeningKeywords.map((item, index) => (
+                        <button 
+                          key={index}
+                          onClick={() => {
+                            setSelectedKeyword(item.keyword);
+                            setIsKeywordChatOpen(true);
+                          }}
+                          className="inline-flex items-center px-4 py-2 rounded-full text-sm bg-white border border-gray-200 hover:border-purple-200 transition-colors cursor-pointer group"
+                        >
+                          <span className="text-gray-800 group-hover:text-purple-600 transition-colors">{item.keyword}</span>
+                          <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+                            item.sentiment > 0.7 ? 'bg-green-100 text-green-700' : 
+                            item.sentiment > 0.5 ? 'bg-yellow-100 text-yellow-700' : 
+                            'bg-red-100 text-red-700'
+                          }`}>
+                            {item.mentions}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -731,8 +842,8 @@ function App() {
             </div>
 
             {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 hover:shadow-md transition-all duration-300 lg:col-span-2">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6">
+              <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 hover:shadow-md transition-all duration-300">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-2 sm:space-y-0">
                   <h4 className="text-lg font-semibold text-gray-900">Engagement Growth</h4>
                   <div className="flex items-center space-x-4 w-full sm:w-auto">
@@ -744,18 +855,32 @@ function App() {
                     <span className="text-green-500 text-sm font-medium bg-green-50 px-3 py-1 rounded-full whitespace-nowrap">+18%</span>
                   </div>
                 </div>
-                <div className="h-[250px] sm:h-[300px]">
+                <div className="h-[400px]">
                   <Line data={engagementData} options={chartOptions} />
                 </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 hover:shadow-md transition-all duration-300">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-2 sm:space-y-0">
-                  <h4 className="text-lg font-semibold text-gray-900">Engagement Breakdown</h4>
-                  <span className="text-green-500 text-sm font-medium bg-green-50 px-3 py-1 rounded-full">+310</span>
-                </div>
-                <div className="h-[250px] sm:h-[300px]">
-                  <Doughnut data={newEngagementData} options={doughnutOptions} />
+                <div className="mt-6 pt-6 border-t border-gray-100">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Total Engagement</p>
+                      <p className="text-xl font-semibold text-gray-900 mt-1">95.2k</p>
+                      <span className="text-green-500 text-sm">+12% vs last month</span>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Engagement Rate</p>
+                      <p className="text-xl font-semibold text-gray-900 mt-1">4.8%</p>
+                      <span className="text-green-500 text-sm">+0.5% vs last month</span>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Avg. Competitor Engagement</p>
+                      <p className="text-xl font-semibold text-gray-900 mt-1">85.0k</p>
+                      <span className="text-purple-500 text-sm">+10.2k difference</span>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Market Position</p>
+                      <p className="text-xl font-semibold text-gray-900 mt-1">Top 3</p>
+                      <span className="text-blue-500 text-sm">+1 vs last month</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -825,22 +950,22 @@ function App() {
                         <h4 className="text-sm font-medium text-gray-700 mb-2">Content Strategy</h4>
                         <div className="space-y-2">
                           <button
-                            onClick={() => setAiQuery("What type of luxury hotel content performs best on Instagram for the London market?")}
+                            onClick={() => setAiQuery("Best content types for luxury hotels on Instagram?")}
                             className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all text-sm"
                           >
-                            Best performing luxury hotel content for London
+                            Top Instagram content formats
                           </button>
                           <button
-                            onClick={() => setAiQuery("How should we showcase our afternoon tea experience to attract more international guests?")}
+                            onClick={() => setAiQuery("How to promote our fine dining experience?")}
                             className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all text-sm"
                           >
-                            Afternoon tea experience promotion
+                            Restaurant promotion ideas
                           </button>
                           <button
-                            onClick={() => setAiQuery("What are the trending hashtags for luxury hotels in London right now?")}
+                            onClick={() => setAiQuery("Trending luxury hotel hashtags this week?")}
                             className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all text-sm"
                           >
-                            Trending London luxury hotel hashtags
+                            Current trending hashtags
                           </button>
                         </div>
                       </div>
@@ -849,16 +974,28 @@ function App() {
                         <h4 className="text-sm font-medium text-gray-700 mb-2">Competitor Analysis</h4>
                         <div className="space-y-2">
                           <button
-                            onClick={() => setAiQuery("What social media strategies are working well for other luxury hotels in London?")}
+                            onClick={() => setAiQuery("Compare our engagement vs Ritz London?")}
                             className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all text-sm"
                           >
-                            Competitor social media strategies
+                            Ritz London comparison
                           </button>
                           <button
-                            onClick={() => setAiQuery("How are other London hotels promoting their spa and wellness offerings?")}
+                            onClick={() => setAiQuery("Top performing posts from Savoy this month?")}
                             className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all text-sm"
                           >
-                            Spa & wellness promotion ideas
+                            Savoy's best content
+                          </button>
+                          <button
+                            onClick={() => setAiQuery("Analyze Dorchester's Instagram strategy")}
+                            className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all text-sm"
+                          >
+                            Dorchester's strategy
+                          </button>
+                          <button
+                            onClick={() => setAiQuery("Competitor spa promotion analysis")}
+                            className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all text-sm"
+                          >
+                            Spa marketing comparison
                           </button>
                         </div>
                       </div>
@@ -867,16 +1004,16 @@ function App() {
                         <h4 className="text-sm font-medium text-gray-700 mb-2">Event Marketing</h4>
                         <div className="space-y-2">
                           <button
-                            onClick={() => setAiQuery("How can we promote our Christmas and New Year packages on social media?")}
+                            onClick={() => setAiQuery("Holiday season social strategy?")}
                             className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all text-sm"
                           >
-                            Holiday season promotion strategy
+                            Holiday campaign ideas
                           </button>
                           <button
-                            onClick={() => setAiQuery("What type of content should we create for London Fashion Week?")}
+                            onClick={() => setAiQuery("Fashion Week content strategy?")}
                             className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all text-sm"
                           >
-                            London Fashion Week content ideas
+                            Fashion Week ideas
                           </button>
                         </div>
                       </div>
@@ -885,16 +1022,16 @@ function App() {
                         <h4 className="text-sm font-medium text-gray-700 mb-2">Guest Experience</h4>
                         <div className="space-y-2">
                           <button
-                            onClick={() => setAiQuery("How can we better showcase our guest experiences and testimonials?")}
+                            onClick={() => setAiQuery("Best ways to showcase guest testimonials?")}
                             className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all text-sm"
                           >
-                            Guest experience showcase ideas
+                            Guest story formats
                           </button>
                           <button
-                            onClick={() => setAiQuery("What are effective ways to encourage guests to share their stay on social media?")}
+                            onClick={() => setAiQuery("How to boost guest social sharing?")}
                             className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all text-sm"
                           >
-                            Guest social sharing strategies
+                            Increase guest sharing
                           </button>
                         </div>
                       </div>
@@ -1081,7 +1218,7 @@ function App() {
                           <div className="flex items-center text-gray-600">
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                             <span className="text-sm">{event.location}</span>
                           </div>
@@ -1095,6 +1232,88 @@ function App() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Keyword Chat Drawer */}
+      {isKeywordChatOpen && selectedKeyword && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setIsKeywordChatOpen(false)}>
+          <div 
+            className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-white shadow-lg transform transition-transform duration-300 ease-in-out translate-x-0 z-50"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="h-full flex flex-col">
+              {/* Drawer Header */}
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      Conversations about "{selectedKeyword}"
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">Recent mentions and discussions</p>
+                  </div>
+                  <button 
+                    onClick={() => setIsKeywordChatOpen(false)}
+                    className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-all"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Drawer Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="space-y-4">
+                  {keywordChats[selectedKeyword]?.map((chat, index) => (
+                    <div key={index} className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-medium">
+                            {chat.user.charAt(0)}
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-gray-900">{chat.user}</h4>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                chat.platform === 'Instagram' ? 'bg-pink-100 text-pink-700' :
+                                chat.platform === 'Twitter' ? 'bg-blue-100 text-blue-700' :
+                                chat.platform === 'Facebook' ? 'bg-indigo-100 text-indigo-700' :
+                                chat.platform === 'LinkedIn' ? 'bg-blue-100 text-blue-800' :
+                                'bg-gray-100 text-gray-700'
+                              }`}>
+                                {chat.platform}
+                              </span>
+                              <span className="text-xs text-gray-500">{chat.time}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          chat.sentiment === 'positive' ? 'bg-green-100 text-green-700' :
+                          chat.sentiment === 'neutral' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {chat.sentiment}
+                        </span>
+                      </div>
+                      <p className="mt-3 text-gray-700">{chat.message}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="p-6 border-t border-gray-200">
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>Showing recent mentions</span>
+                  <button className="text-purple-600 hover:text-purple-700 font-medium">
+                    View all
+                  </button>
                 </div>
               </div>
             </div>

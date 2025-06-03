@@ -185,26 +185,17 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Form Section */}
         <div className="bg-white rounded-2xl shadow-sm p-8 hover:shadow-md transition-all duration-300">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center mb-8">
             <div>
               <h2 className="text-3xl font-bold text-gray-900">Create New Post</h2>
               <p className="text-gray-600 mt-2">Share your content across social platforms</p>
             </div>
-            <button
-              onClick={() => onSubmit({ content: '', platform: '', mediaUrls: [], hashtags: [] })}
-              className="flex items-center text-gray-600 hover:text-purple-600 transition-colors"
-            >
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Back to Dashboard
-            </button>
           </div>
 
           {/* Platform Selection */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose Platform</h3>
-            <div className="grid grid-cols-3 gap-4">
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Choose Platform</h3>
+            <div className="grid grid-cols-3 gap-3">
               {SOCIAL_PLATFORMS.map((socialPlatform) => (
                 <button
                   key={socialPlatform.id}
@@ -212,18 +203,18 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
                     setPlatform(socialPlatform.id);
                     setShowPreview(true);
                   }}
-                  className={`relative rounded-xl p-4 flex flex-col items-center justify-center gap-3 transition-all duration-200 ${
+                  className={`relative rounded-lg p-2.5 flex flex-col items-center justify-center gap-2 transition-all duration-200 ${
                     platform === socialPlatform.id
                       ? `${socialPlatform.color} text-white ring-2 ring-offset-2 ring-${socialPlatform.color}`
                       : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
                   }`}
                 >
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                     platform === socialPlatform.id ? 'bg-white/20' : 'bg-white'
                   }`}>
-                    <img src={socialPlatform.icon} alt={socialPlatform.name} className="w-8 h-8" />
+                    <img src={socialPlatform.icon} alt={socialPlatform.name} className="w-5 h-5" />
                   </div>
-                  <span className="text-sm font-medium">{socialPlatform.name}</span>
+                  <span className="text-xs font-medium">{socialPlatform.name}</span>
                 </button>
               ))}
             </div>
