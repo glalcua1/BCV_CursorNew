@@ -46,7 +46,7 @@ const SOCIAL_PLATFORMS: SocialPlatform[] = [
 
 const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
   const [content, setContent] = useState('');
-  const [platform, setPlatform] = useState('');
+  const [platform, setPlatform] = useState('facebook');
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
   const [scheduledTime, setScheduledTime] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -54,7 +54,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
   const [prompt, setPrompt] = useState('');
   const [suggestedTimes, setSuggestedTimes] = useState<string[]>([]);
   const [isAIEnabled, setIsAIEnabled] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -233,8 +233,11 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
               {/* AI Content Generation */}
               <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-700">AI Content Assistant</h3>
-                  <label className="flex items-center cursor-pointer">
+                  <div className="flex items-center space-x-3">
+                    <h3 className="text-lg font-semibold text-gray-700">AI Content Assistant</h3>
+                    <div className="bg-purple-100 text-purple-600 px-2 py-0.5 rounded text-xs font-medium">Beta</div>
+                  </div>
+                  <label className="flex items-center cursor-pointer group">
                     <div className="relative">
                       <input
                         type="checkbox"
@@ -242,11 +245,27 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
                         checked={isAIEnabled}
                         onChange={(e) => setIsAIEnabled(e.target.checked)}
                       />
-                      <div className={`w-10 h-6 rounded-full transition-colors duration-200 ease-in-out ${isAIEnabled ? 'bg-purple-600' : 'bg-gray-200'}`}>
-                        <div className={`w-4 h-4 rounded-full bg-white transform transition-transform duration-200 ease-in-out ${isAIEnabled ? 'translate-x-5' : 'translate-x-1'} mt-1`} />
+                      <div className={`w-14 h-7 rounded-full transition-colors duration-300 ease-in-out ${
+                        isAIEnabled ? 'bg-gradient-to-r from-purple-600 to-blue-500' : 'bg-gray-200'
+                      } group-hover:${isAIEnabled ? 'opacity-90' : 'bg-gray-300'}`}>
+                        <div className={`absolute left-1 top-1 w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform duration-300 ease-in-out flex items-center justify-center ${
+                          isAIEnabled ? 'translate-x-7' : 'translate-x-0'
+                        }`}>
+                          {isAIEnabled ? (
+                            <svg className="w-3 h-3 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M13.5 10a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0ZM10 2a.75.75 0 0 1 .75.75v1.502a7.027 7.027 0 0 1 4.97 4.97h1.502a.75.75 0 0 1 0 1.5h-1.502a7.027 7.027 0 0 1-4.97 4.97v1.502a.75.75 0 0 1-1.5 0v-1.502a7.027 7.027 0 0 1-4.97-4.97H3.778a.75.75 0 0 1 0-1.5h1.502a7.027 7.027 0 0 1 4.97-4.97V2.75A.75.75 0 0 1 10 2ZM8.5 10a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0Z" />
+                            </svg>
+                          ) : (
+                            <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M3.5 2A1.5 1.5 0 0 0 2 3.5v13A1.5 1.5 0 0 0 3.5 18h13a1.5 1.5 0 0 0 1.5-1.5V9.412c0-.399-.158-.781-.44-1.063l-3.91-3.91a1.5 1.5 0 0 0-1.061-.439H3.5ZM3.5 3h7.086c.133 0 .26.053.354.146l3.91 3.91c.093.093.146.22.146.353V16.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 .5-.5Z" />
+                            </svg>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <span className="ml-2 text-sm text-gray-600">Enable AI</span>
+                    <span className={`ml-3 text-sm font-medium transition-colors duration-200 ${isAIEnabled ? 'text-purple-600' : 'text-gray-500'}`}>
+                      {isAIEnabled ? 'AI Enabled' : 'Enable AI'}
+                    </span>
                   </label>
                 </div>
                 {isAIEnabled && (
@@ -412,7 +431,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
         </div>
 
         {/* Preview Section */}
-        <div className="lg:sticky lg:top-6 space-y-6">
+        <div className="lg:sticky lg:top-6 h-fit space-y-6 self-start">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-700">Post Preview</h3>
             <button

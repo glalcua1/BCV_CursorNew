@@ -14,6 +14,7 @@ import {
 } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import CreatePost from './components/CreatePost';
+import Calendar from './components/Calendar';
 
 ChartJS.register(
   CategoryScale,
@@ -423,7 +424,7 @@ function App() {
   return (
     <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
       {/* Left Navigation */}
-      <nav className={`${isNavCollapsed ? 'w-20' : 'w-64'} bg-white border-r border-gray-200 h-full transition-all duration-300 ease-in-out flex flex-col shadow-sm relative z-10`}>
+      <nav className={`${isNavCollapsed ? 'w-[72px]' : 'w-[230px]'} bg-white border-r border-gray-200 h-full transition-all duration-300 ease-in-out flex flex-col shadow-sm relative z-10`}>
         <div className={`p-6 flex ${isNavCollapsed ? 'justify-center' : 'justify-between'} items-center border-b border-gray-100`}>
           <h1 className={`text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 text-transparent bg-clip-text ${isNavCollapsed ? 'hidden' : 'block'}`}>BCV</h1>
           <button 
@@ -455,7 +456,14 @@ function App() {
               </svg>
               <span className={`${isNavCollapsed ? 'hidden' : 'block'}`}>Analytics</span>
             </a>
-            <a href="#" className={`flex items-center ${isNavCollapsed ? 'justify-center px-2' : 'px-4'} py-3 text-gray-600 rounded-xl hover:bg-gray-50 group transition-all duration-200`}>
+            <a 
+              href="#" 
+              onClick={(e) => {
+                e.preventDefault();
+                setCurrentView('calendar');
+              }}
+              className={`flex items-center ${isNavCollapsed ? 'justify-center px-2' : 'px-4'} py-3 text-gray-600 rounded-xl hover:bg-gray-50 group transition-all duration-200 ${currentView === 'calendar' ? 'bg-purple-50 text-purple-600' : ''}`}
+            >
               <svg className={`w-6 h-6 ${isNavCollapsed ? '' : 'mr-3'} group-hover:text-purple-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -488,7 +496,7 @@ function App() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="bg-white shadow-sm z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className={`mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ${isNavCollapsed ? 'max-w-[95%]' : 'max-w-7xl'}`}>
             <div className="py-4 flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
@@ -519,7 +527,7 @@ function App() {
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto bg-gray-50">
           {currentView === 'dashboard' ? (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className={`mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-all duration-300 ${isNavCollapsed ? 'max-w-[95%]' : 'max-w-7xl'}`}>
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
@@ -535,12 +543,23 @@ function App() {
 
               {/* Update Performance Score Card */}
               <div 
-                className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-2xl mb-8 border border-blue-100 cursor-pointer hover:shadow-lg transition-shadow"
+                className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-2xl mb-8 border border-blue-100 cursor-pointer hover:shadow-lg transition-all duration-300"
                 onClick={() => setIsTopPostsDrawerOpen(true)}
               >
-                <div className="flex flex-col lg:flex-row justify-between gap-8">
+                <div className={`flex flex-col ${isNavCollapsed ? 'lg:flex-row' : 'xl:flex-row'} justify-between gap-8`}>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-4 text-gray-900">Social Performance Score</h3>
+                    <div className="flex items-center mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Social Performance Score</h3>
+                      <div className="relative group ml-2">
+                        <svg className="w-5 h-5 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                          A weighted score (0-100%) calculated from your social media metrics including followers, impressions, engagement, and link clicks relative to their targets. Higher scores indicate better overall social media performance.
+                          <div className="absolute left-1/2 -bottom-1 -translate-x-1/2 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                        </div>
+                      </div>
+                    </div>
                     <div className="flex items-baseline space-x-4 mb-4">
                       <span className="text-5xl font-bold text-gray-900">{performanceScore}%</span>
                       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
@@ -574,10 +593,14 @@ function App() {
                   <img 
                     src="/assets/images/freepik__upload__12989.png" 
                     alt="Social Media Performance Illustration" 
-                    className="w-full h-auto lg:max-w-md xl:max-w-lg rounded-xl object-cover"
+                    className={`w-full h-auto rounded-xl object-cover transition-all duration-300 ${
+                      isNavCollapsed 
+                        ? 'lg:max-w-sm xl:max-w-md' 
+                        : 'lg:max-w-md xl:max-w-lg'
+                    }`}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.onerror = null; // Prevent infinite loop
+                      target.onerror = null;
                       target.src = 'https://placehold.co/400x200?text=Social+Media+Performance';
                     }}
                   />
@@ -585,7 +608,11 @@ function App() {
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className={`grid gap-4 mb-8 transition-all duration-300 ${
+                isNavCollapsed 
+                  ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-6' 
+                  : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
+              }`}>
                 <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                   <h4 className="text-gray-600 mb-2 text-sm">Total Followers</h4>
                   <div className="flex items-baseline justify-between">
@@ -621,8 +648,14 @@ function App() {
               </div>
 
               {/* Charts Section */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+              <div className={`grid gap-4 transition-all duration-300 ${
+                isNavCollapsed 
+                  ? 'grid-cols-1 lg:grid-cols-4' 
+                  : 'grid-cols-1 lg:grid-cols-3'
+              }`}>
+                <div className={`bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 ${
+                  isNavCollapsed ? 'lg:col-span-2' : ''
+                }`}>
                   <div className="flex items-center justify-between mb-6">
                     <h4 className="font-semibold text-gray-900">Engagement Growth</h4>
                     <span className="text-green-500 text-sm font-medium bg-green-50 px-3 py-1 rounded-full">+18%</span>
@@ -655,88 +688,92 @@ function App() {
             <CreatePost 
               onSubmit={(post) => {
                 console.log('New post:', post);
-                // Here you would typically send the post to your backend
                 setCurrentView('dashboard');
               }} 
             />
+          ) : currentView === 'calendar' ? (
+            <Calendar events={upcomingEvents} />
           ) : null}
         </main>
       </div>
 
       {/* AI Assistant Drawer */}
-      <div 
-        className={`fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
-          isAIDrawerOpen ? 'translate-x-0' : 'translate-x-full'
-        } z-50`}
-      >
-        <div className="h-full flex flex-col">
-          {/* Drawer Header */}
-          <div className="p-4 border-b">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 text-transparent bg-clip-text">
-                Social Media AI Assistant
-              </h2>
-              <button 
-                onClick={() => setIsAIDrawerOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-
-          {/* Drawer Content */}
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="space-y-6">
-              {/* Ready-made Prompts */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-gray-700">Quick Prompts</h3>
-                {readyMadePrompts.map((category, idx) => (
-                  <div key={idx} className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-600">{category.title}</h4>
-                    <div className="space-y-2">
-                      {category.prompts.map((prompt, promptIdx) => (
-                        <button
-                          key={promptIdx}
-                          onClick={() => setAiQuery(prompt)}
-                          className="block w-full text-left text-sm p-2 rounded hover:bg-gray-50 text-gray-700 hover:text-purple-600 transition-colors"
-                        >
-                          {prompt}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Query Input */}
-              <div className="space-y-4">
-                <textarea
-                  value={aiQuery}
-                  onChange={(e) => setAiQuery(e.target.value)}
-                  placeholder="Type your question or click a prompt above..."
-                  className="w-full border rounded-lg p-3 h-32 focus:outline-none focus:border-purple-500 text-sm"
-                />
-                <button
-                  onClick={handleAskAI}
-                  disabled={!aiQuery.trim() || isLoading}
-                  className="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity"
-                >
-                  {isLoading ? 'Thinking...' : 'Ask AI'}
-                </button>
-              </div>
-
-              {/* AI Response */}
-              {aiResponse && (
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-gray-700 mb-2">AI Response:</h4>
-                  <p className="text-gray-800 text-sm">{aiResponse}</p>
+      {isAIDrawerOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setIsAIDrawerOpen(false)}>
+          <div 
+            className="fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out translate-x-0 z-50"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="h-full flex flex-col">
+              {/* Drawer Header */}
+              <div className="p-4 border-b">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 text-transparent bg-clip-text">
+                    Social Media AI Assistant
+                  </h2>
+                  <button 
+                    onClick={() => setIsAIDrawerOpen(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
                 </div>
-              )}
+              </div>
+
+              {/* Drawer Content */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="space-y-6">
+                  {/* Ready-made Prompts */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-gray-700">Quick Prompts</h3>
+                    {readyMadePrompts.map((category, idx) => (
+                      <div key={idx} className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-600">{category.title}</h4>
+                        <div className="space-y-2">
+                          {category.prompts.map((prompt, promptIdx) => (
+                            <button
+                              key={promptIdx}
+                              onClick={() => setAiQuery(prompt)}
+                              className="block w-full text-left text-sm p-2 rounded hover:bg-gray-50 text-gray-700 hover:text-purple-600 transition-colors"
+                            >
+                              {prompt}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Query Input */}
+                  <div className="space-y-4">
+                    <textarea
+                      value={aiQuery}
+                      onChange={(e) => setAiQuery(e.target.value)}
+                      placeholder="Type your question or click a prompt above..."
+                      className="w-full border rounded-lg p-3 h-32 focus:outline-none focus:border-purple-500 text-sm"
+                    />
+                    <button
+                      onClick={handleAskAI}
+                      disabled={!aiQuery.trim() || isLoading}
+                      className="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-opacity"
+                    >
+                      {isLoading ? 'Thinking...' : 'Ask AI'}
+                    </button>
+                  </div>
+
+                  {/* AI Response */}
+                  {aiResponse && (
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-medium text-gray-700 mb-2">AI Response:</h4>
+                      <p className="text-gray-800 text-sm">{aiResponse}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Top Posts Drawer */}
       <div 
@@ -816,71 +853,74 @@ function App() {
       </div>
 
       {/* Events Drawer */}
-      <div 
-        className={`fixed inset-y-0 right-0 w-full sm:w-[480px] bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
-          isEventsDrawerOpen ? 'translate-x-0' : 'translate-x-full'
-        } z-50`}
-      >
-        <div className="h-full flex flex-col">
-          {/* Drawer Header */}
-          <div className="p-4 border-b">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">
-                Upcoming Events in London
-              </h2>
-              <button 
-                onClick={() => setIsEventsDrawerOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            <p className="text-gray-600 text-sm mt-1">Next 30 days</p>
-          </div>
-
-          {/* Drawer Content */}
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="space-y-6">
-              {upcomingEvents.map((event) => (
-                <div key={event.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                  <img src={event.image} alt={event.title} className="w-full h-48 object-cover" />
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                        {event.category}
-                      </span>
-                      <span className="text-gray-500 text-sm">{event.date}</span>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{event.title}</h3>
-                    <p className="text-gray-600 text-sm mb-4">{event.description}</p>
-                    <div className="space-y-2">
-                      <div className="flex items-center text-gray-600">
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="text-sm">{event.time}</span>
-                      </div>
-                      <div className="flex items-center text-gray-600">
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span className="text-sm">{event.location}</span>
-                      </div>
-                      <div className="flex items-center text-gray-600">
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        <span className="text-sm">{event.attendees} attendees</span>
-                      </div>
-                    </div>
-                  </div>
+      {isEventsDrawerOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setIsEventsDrawerOpen(false)}>
+          <div 
+            className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-white shadow-lg transform transition-transform duration-300 ease-in-out translate-x-0 z-50"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="h-full flex flex-col">
+              {/* Drawer Header */}
+              <div className="p-4 border-b">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Upcoming Events in London
+                  </h2>
+                  <button 
+                    onClick={() => setIsEventsDrawerOpen(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
                 </div>
-              ))}
+                <p className="text-gray-600 text-sm mt-1">Next 30 days</p>
+              </div>
+
+              {/* Drawer Content */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="space-y-6">
+                  {upcomingEvents.map((event) => (
+                    <div key={event.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                      <img src={event.image} alt={event.title} className="w-full h-48 object-cover" />
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                            {event.category}
+                          </span>
+                          <span className="text-gray-500 text-sm">{event.date}</span>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{event.title}</h3>
+                        <p className="text-gray-600 text-sm mb-4">{event.description}</p>
+                        <div className="space-y-2">
+                          <div className="flex items-center text-gray-600">
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-sm">{event.time}</span>
+                          </div>
+                          <div className="flex items-center text-gray-600">
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span className="text-sm">{event.location}</span>
+                          </div>
+                          <div className="flex items-center text-gray-600">
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <span className="text-sm">{event.attendees} attendees</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
