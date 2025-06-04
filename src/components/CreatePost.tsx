@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 
+enum TabType {
+  NEW = 'new',
+  DRAFT = 'draft',
+  LIVE = 'live'
+}
+
 interface CreatePostProps {
   onSubmit: (post: {
     content: string;
@@ -9,6 +15,25 @@ interface CreatePostProps {
     hashtags: string[];
   }) => void;
 }
+
+interface TabButtonProps {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}
+
+const TabButton: React.FC<TabButtonProps> = ({ active, onClick, children }) => (
+  <button
+    onClick={onClick}
+    className={`px-6 py-3 text-sm font-medium rounded-lg transition-colors ${
+      active
+        ? 'bg-gradient-to-r from-purple-600 to-blue-500 text-white'
+        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+    }`}
+  >
+    {children}
+  </button>
+);
 
 interface SocialPlatform {
   id: string;
@@ -39,6 +64,7 @@ const SOCIAL_PLATFORMS: SocialPlatform[] = [
 ];
 
 const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
+  const [activeTab, setActiveTab] = useState<TabType>(TabType.NEW);
   const [content, setContent] = useState('');
   const [platform, setPlatform] = useState('facebook');
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
@@ -48,7 +74,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
   const [prompt, setPrompt] = useState('');
   const [suggestedTimes, setSuggestedTimes] = useState<string[]>([]);
   const [isAIEnabled, setIsAIEnabled] = useState(false);
-  const [showPreview, setShowPreview] = useState(true);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,14 +207,70 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Form Section */}
+    <div className="max-w-4xl mx-auto px-6 py-8">
+      {/* Tabs */}
+      <div className="bg-white rounded-2xl shadow-sm p-6 mb-8">
+        <div className="flex space-x-4">
+          <TabButton
+            active={activeTab === TabType.NEW}
+            onClick={() => setActiveTab(TabType.NEW)}
+          >
+            New Post
+          </TabButton>
+          <TabButton
+            active={activeTab === TabType.DRAFT}
+            onClick={() => setActiveTab(TabType.DRAFT)}
+          >
+            Draft Posts
+          </TabButton>
+          <TabButton
+            active={activeTab === TabType.LIVE}
+            onClick={() => setActiveTab(TabType.LIVE)}
+          >
+            Live Posts
+          </TabButton>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      {activeTab === TabType.NEW && (
         <div className="bg-white rounded-2xl shadow-sm p-8 hover:shadow-md transition-all duration-300">
-          <div className="flex items-center mb-8">
+          <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-3xl font-bold text-gray-900">Create New Post</h2>
               <p className="text-gray-600 mt-2">Share your content across social platforms</p>
+            </div>
+            <button
+              onClick={() => setShowPreviewModal(true)}
+              className="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              Preview
+            </button>
+          </div>
+
+          {/* Upcoming Events in London */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Events in London</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-4 hover:shadow-md transition-all duration-300">
+                <div className="text-purple-600 font-semibold mb-2">London Tech Week</div>
+                <p className="text-gray-600 text-sm mb-2">June 10-14, 2024</p>
+                <p className="text-gray-500 text-sm">Europe's largest technology festival at Queen Elizabeth II Centre</p>
+              </div>
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-4 hover:shadow-md transition-all duration-300">
+                <div className="text-purple-600 font-semibold mb-2">Royal Chelsea Flower Show</div>
+                <p className="text-gray-600 text-sm mb-2">May 21-25, 2024</p>
+                <p className="text-gray-500 text-sm">World's most prestigious flower show at Royal Hospital Chelsea</p>
+              </div>
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-4 hover:shadow-md transition-all duration-300">
+                <div className="text-purple-600 font-semibold mb-2">Wimbledon Championships</div>
+                <p className="text-gray-600 text-sm mb-2">July 1-14, 2024</p>
+                <p className="text-gray-500 text-sm">The world's oldest tennis tournament at All England Club</p>
+              </div>
             </div>
           </div>
 
@@ -199,10 +281,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
               {SOCIAL_PLATFORMS.map((socialPlatform) => (
                 <button
                   key={socialPlatform.id}
-                  onClick={() => {
-                    setPlatform(socialPlatform.id);
-                    setShowPreview(true);
-                  }}
+                  onClick={() => setPlatform(socialPlatform.id)}
                   className={`relative rounded-lg p-2.5 flex flex-col items-center justify-center gap-2 transition-all duration-200 ${
                     platform === socialPlatform.id
                       ? `${socialPlatform.color} text-white ring-2 ring-offset-2 ring-${socialPlatform.color}`
@@ -434,21 +513,201 @@ const CreatePost: React.FC<CreatePostProps> = ({ onSubmit }) => {
             </form>
           )}
         </div>
+      )}
 
-        {/* Preview Section */}
-        <div className="lg:sticky lg:top-8 space-y-6 self-start">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Post Preview</h3>
-            <button
-              onClick={() => setShowPreview(!showPreview)}
-              className="text-sm text-purple-600 hover:text-purple-700 font-medium"
-            >
-              {showPreview ? 'Hide Preview' : 'Show Preview'}
-            </button>
+      {/* Draft Posts Tab */}
+      {activeTab === TabType.DRAFT && (
+        <div className="bg-white rounded-2xl shadow-sm p-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900">Draft Posts</h2>
+              <p className="text-gray-600 mt-2">Continue working on your saved drafts</p>
+            </div>
           </div>
-          {showPreview && platform && <PostPreview />}
+          
+          <div className="space-y-6">
+            {/* Example draft posts - In a real app, these would come from your backend */}
+            <div className="border border-gray-200 rounded-xl p-6 hover:shadow-sm transition-all duration-200">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Summer Collection Launch</h3>
+                  <p className="text-gray-600 mt-2 line-clamp-2">Get ready for our exciting summer collection! We're bringing fresh styles and vibrant colors...</p>
+                  <div className="flex items-center mt-4 space-x-4">
+                    <span className="text-sm text-gray-500">Platform: Instagram</span>
+                    <span className="text-sm text-gray-500">Last edited: 2 days ago</span>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="p-2 text-gray-600 hover:text-gray-900">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                  <button className="p-2 text-gray-600 hover:text-red-600">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="border border-gray-200 rounded-xl p-6 hover:shadow-sm transition-all duration-200">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Customer Appreciation Day</h3>
+                  <p className="text-gray-600 mt-2 line-clamp-2">Join us for an exclusive Customer Appreciation Day! Special discounts and surprises await...</p>
+                  <div className="flex items-center mt-4 space-x-4">
+                    <span className="text-sm text-gray-500">Platform: Facebook</span>
+                    <span className="text-sm text-gray-500">Last edited: 5 days ago</span>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="p-2 text-gray-600 hover:text-gray-900">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                  <button className="p-2 text-gray-600 hover:text-red-600">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Live Posts Tab */}
+      {activeTab === TabType.LIVE && (
+        <div className="bg-white rounded-2xl shadow-sm p-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900">Live Posts</h2>
+              <p className="text-gray-600 mt-2">Monitor and manage your published posts</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {/* Example live posts - In a real app, these would come from your backend */}
+            <div className="border border-gray-200 rounded-xl p-6 hover:shadow-sm transition-all duration-200">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Spring Collection Highlights</h3>
+                  <p className="text-gray-600 mt-2 line-clamp-2">Discover our top picks from the Spring Collection! From elegant dresses to casual wear...</p>
+                  <div className="flex items-center mt-4 space-x-4">
+                    <span className="text-sm text-gray-500">Platform: Instagram</span>
+                    <span className="text-sm text-gray-500">Posted: 3 days ago</span>
+                    <div className="flex items-center space-x-2 text-green-600">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm font-medium">Published</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center mt-4 space-x-6">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-5 h-5 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm text-gray-600">2.5k Likes</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm text-gray-600">128 Comments</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="p-2 text-gray-600 hover:text-gray-900">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </button>
+                  <button className="p-2 text-gray-600 hover:text-blue-600">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="border border-gray-200 rounded-xl p-6 hover:shadow-sm transition-all duration-200">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Weekend Special Offer</h3>
+                  <p className="text-gray-600 mt-2 line-clamp-2">Don't miss out on our weekend special! Get 30% off on all accessories...</p>
+                  <div className="flex items-center mt-4 space-x-4">
+                    <span className="text-sm text-gray-500">Platform: Facebook</span>
+                    <span className="text-sm text-gray-500">Posted: 1 week ago</span>
+                    <div className="flex items-center space-x-2 text-green-600">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm font-medium">Published</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center mt-4 space-x-6">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-5 h-5 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm text-gray-600">1.8k Likes</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm text-gray-600">95 Comments</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="p-2 text-gray-600 hover:text-gray-900">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </button>
+                  <button className="p-2 text-gray-600 hover:text-blue-600">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {showPreviewModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b px-6 py-4 rounded-t-2xl flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-gray-900">Post Preview</h3>
+              <button
+                onClick={() => setShowPreviewModal(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <PostPreview />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

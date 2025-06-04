@@ -11,3 +11,34 @@ button:focus {
 .shadow-sm {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
+
+/* Dark mode transitions */
+.dark {
+  color-scheme: dark;
+}
+
+/* Dark mode specific styles */
+.dark select {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: #f3f4f6;
+}
+
+.dark select:focus {
+  border-color: #9333ea;
+}
+
+.dark button {
+  color: #f3f4f6;
+}
+
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* Smooth transitions for dark mode */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
